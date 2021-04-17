@@ -15,10 +15,10 @@ enum LED_States {LED_SMStart, LED_B0on, LED_B1on, LED_B0wait, LED_B1wait} LED_St
 void SMTick(){
 	switch(LED_State){
 		case LED_SMStart:
-			LED_State = LED_B0on;
+			LED_State = LED_B0wait;
 			break;
 		case LED_B0on:
-			if(PINA & 0x01){
+			if((PINA & 0x01) == 0x01){
 				LED_State = LED_B0on;
 			}
 			else{
@@ -26,7 +26,7 @@ void SMTick(){
 			}
 			break;
 		case LED_B0wait:
-			if(PINA & 0x01){
+			if((PINA & 0x01) == 0x01){
 				LED_State = LED_B1on;
 			}
 			else{
@@ -34,7 +34,7 @@ void SMTick(){
 			}
 			break;
 	 	case LED_B1on:
-			if(PINA & 0x01){
+			if((PINA & 0x01) == 0x01){
                                 LED_State = LED_B1on;
                         }
                         else{
@@ -42,7 +42,7 @@ void SMTick(){
                         }
                         break; 
 		case LED_B1wait:
-			if(PINA & 0x01){
+			if((PINA & 0x01) == 0x01){
 				LED_State = LED_B0on;
 			}
 			else{
@@ -69,6 +69,7 @@ void SMTick(){
 			PORTB = 0x02;
                         break;
 		default:
+			PORTB = 0x01;
 			break;
 		}
 
@@ -82,7 +83,7 @@ int main(void) {
 	DDRB = 0xFF;
 	PORTB = 0x00;
     /* Insert your solution below */
-	LED_State = LED_SMStart;
+//	LED_State = LED_SMStart;
     while (1) {
 	SMTick();
     }
