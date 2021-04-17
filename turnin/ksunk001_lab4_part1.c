@@ -44,7 +44,7 @@ void SMTick(){
 			PORTB = 0x01;
 			break;
 		case LED_B1on:
-			PORTB = 0x02;
+			PORTB = 0x01;
                         break;
 		default:
 			break;
