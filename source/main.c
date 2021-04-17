@@ -11,7 +11,7 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum LED_States {LED_SMStart, LED_B0on, LED_B1on} LED_State;
+enum LED_States {LED_SMStart, LED_B0on, LED_B1on, LED_B0wait, LED_B1wait} LED_State;
 void SMTick(){
 	switch(LED_State){
 		case LED_SMStart:
@@ -19,20 +19,36 @@ void SMTick(){
 			break;
 		case LED_B0on:
 			if(PINA & 0x01){
+				LED_State = LED_B0on;
+			}
+			else{
+				LED_State = LED_B0wait;
+			}
+			break;
+		case LED_B0wait:
+			if(PINA & 0x01){
 				LED_State = LED_B1on;
 			}
 			else{
-				LED_State = LED_B0on;
+				LED_State = LED_B0wait;
 			}
 			break;
 	 	case LED_B1on:
 			if(PINA & 0x01){
-                                LED_State = LED_B0on;
-                        }
-                        else{
                                 LED_State = LED_B1on;
                         }
-                        break;     
+                        else{
+                                LED_State = LED_B1wait;
+                        }
+                        break; 
+		case LED_B1wait:
+			if(PINA & 0x01){
+				LED_State = LED_B0on;
+			}
+			else{
+				LED_State = LED_B1wait;
+			}
+			break;
 		default:
 			LED_State = LED_SMStart;
 			break;
@@ -42,6 +58,12 @@ void SMTick(){
         		break;
 		case LED_B0on:
 			PORTB = 0x01;
+			break;
+		case LED_B0wait:
+			PORTB = 0x01;
+			break;
+		case LED_B1wait:
+			PORTB = 0x02;
 			break;
 		case LED_B1on:
 			PORTB = 0x02;
