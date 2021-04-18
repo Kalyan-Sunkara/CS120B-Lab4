@@ -11,65 +11,107 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum LED_States {LED_SMStart, LED_B0on, LED_B1on, LED_B0wait, LED_B1wait} LED_State;
+enum Counter_States {Counter_SMStart, Counter_start, Counter_add, Counter_sub, Counter_reset, Counter_wait, Counter_addWait, Counter_subWait} Counter_State;
 void SMTick(){
-	switch(LED_State){
-		case LED_SMStart:
-			LED_State = LED_B0wait;
+	switch(Counter_State){
+		case Counter_SMStart:
+			Counter_State = Counter_start;
 			break;
-		case LED_B0on:
-			if((PINA & 0x01) == 0x01){
-				LED_State = LED_B0on;
+		case Counter_start:
+			Counter_State =  Counter_wait;
+			break;
+		case Counter_wait:
+			if((PINA & 0x01) && !(PINA & 0x02)){
+				Counter_State = Counter_add;
+			}
+			else if(!(PINA & 0x01) && (PINA & 0x02)){
+				Counter_State = Counter_Sub;
+			}
+			else if((PINA & 0x01) && (PINA & 0x02)){
+				Counter_State  = Counter_reset;
 			}
 			else{
-				LED_State = LED_B0wait;
+				Counter_State = Counter_wait;	
 			}
 			break;
-		case LED_B0wait:
-			if((PINA & 0x01) == 0x01){
-				LED_State = LED_B1on;
+	 	case Counter_add:
+			if(!(PINA & 0x01)){
+                                Counter_State = Counter_wait;
+                        }
+// 			else if((PINA & 0x01) && !(PINA & 0x02)){
+// 				Counter_State = Counter_addWait
+// 			}
+                        else{
+                                Counter_State = Counter_addWait;
+                        }
+                        break;
+		case  Counter_addWait:
+			if(!(PINA & 0x01)){
+                                Counter_State = Counter_wait;
+                        }
+			else if((PINA & 0x01) && (PINA & 0x02){
+				Counter_State = Counter_reset;
 			}
 			else{
-				LED_State = LED_B0wait;
+				Counter_State = Counter_addWait;
 			}
 			break;
-	 	case LED_B1on:
-			if((PINA & 0x01) == 0x01){
-                                LED_State = LED_B1on;
+		case Counter_sub:
+			if(!(PINA & 0x02)){
+                                Counter_State = Counter_wait;
                         }
                         else{
-                                LED_State = LED_B1wait;
+                                Counter_State = Counter_subWait;
                         }
-                        break; 
-		case LED_B1wait:
-			if((PINA & 0x01) == 0x01){
-				LED_State = LED_B0on;
+                        break;
+		case  Counter_subWait:
+			if(!(PINA & 0x02)){
+                                Counter_State = Counter_wait;
+                        }
+			else if((PINA & 0x02) && (PINA & 0x01){
+				Counter_State = Counter_reset;
 			}
 			else{
-				LED_State = LED_B1wait;
+				Counter_State = Counter_subWait;
+			}
+				break;
+		case Counter_reset:
+			if((PINA & 0x01) & (PINA & 0x02)){
+				Counter_State = Counter_reset;	
+			}
+			else{
+				Counter_State = Counter_wait;	
 			}
 			break;
 		default:
-			LED_State = LED_SMStart;
+			Counter_State = Counter_SMStart;
 			break;
 	}
-	switch(LED_State) {   // State actions
-     		case LED_SMStart:
-        		break;
-		case LED_B0on:
-			PORTB = 0x01;
+	switch(Counter_State) {   // State actions
+ 		case Counter_SMStart:
 			break;
-		case LED_B0wait:
-			PORTB = 0x01;
+		case Counter_start:
+			PORTC = 0x07;
+		case Counter_wait:
 			break;
-		case LED_B1wait:
-			PORTB = 0x02;
-			break;
-		case LED_B1on:
-			PORTB = 0x02;
+	 	case Counter_add:
+			if(PORTC < 9){
+				PORTC = PORTC + 1;	
+			}
                         break;
+		case  Counter_addWait:
+			break;
+		case Counter_sub:
+			if(PORTC > 0){
+				PORTC = PORTC - 1;	
+			}
+			break;
+		case  Counter_subWait:
+			break;
+		case Counter_reset:
+			PORTC = 0x00;
+			break;
 		default:
-			PORTB = 0x01;
 			break;
 		}
 
@@ -80,8 +122,8 @@ int main(void) {
 	DDRA = 0x00;
 	PORTA = 0xFF;
 
-	DDRB = 0xFF;
-	PORTB = 0x00;
+	DDRC = 0xFF;
+	PORTC = 0x00;
     /* Insert your solution below */
 //	LED_State = LED_SMStart;
     while (1) {
