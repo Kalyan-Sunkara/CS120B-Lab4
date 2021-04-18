@@ -11,80 +11,17 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum Counter_States {Counter_SMStart, Counter_start, Counter_add, Counter_sub, Counter_reset, Counter_wait, Counter_addWait, Counter_subWait} Counter_State;
+enum Lock_States {Lock_SMStart, Lock_wait, Lock_hash, Lock_hashWait, Lock_Y, Lock_YWait, LOCK, UNLOCK} Lock_State;
 void SMTick(){
-	switch(Counter_State){
-		case Counter_SMStart:
-			Counter_State = Counter_start;
+	switch(Lock_State){
+		case Lock_SMStart:
+			Lock_State = Lock_wait;
 			break;
-		case Counter_start:
-			Counter_State =  Counter_wait;
-			break;
-		case Counter_wait:
-			if((PINA & 0x01) && !(PINA & 0x02)){
-				Counter_State = Counter_add;
-			}
-			else if(!(PINA & 0x01) && (PINA & 0x02)){
-				Counter_State = Counter_sub;
-			}
-			else if((PINA & 0x01) && (PINA & 0x02)){
-				Counter_State  = Counter_reset;
-			}
-			else{
-				Counter_State = Counter_wait;	
-			}
-			break;
-	 	case Counter_add:
-			if(!(PINA & 0x01)){
-                                Counter_State = Counter_wait;
-                        }
-// 			else if((PINA & 0x01) && !(PINA & 0x02)){
-// 				Counter_State = Counter_addWait
-// 			}
-                        else{
-                                Counter_State = Counter_addWait;
-                        }
-                        break;
-		case  Counter_addWait:
-			if(!(PINA & 0x01)){
-                                Counter_State = Counter_wait;
-                        }
-			else if((PINA & 0x01) && (PINA & 0x02)){
-				Counter_State = Counter_reset;
-			}
-			else{
-				Counter_State = Counter_addWait;
-			}
-			break;
-		case Counter_sub:
-			if(!(PINA & 0x02)){
-                                Counter_State = Counter_wait;
-                        }
-                        else{
-                                Counter_State = Counter_subWait;
-                        }
-                        break;
-		case  Counter_subWait:
-			if(!(PINA & 0x02)){
-                                Counter_State = Counter_wait;
-                        }
-			else if((PINA & 0x01) && (PINA & 0x02)){
-				Counter_State = Counter_reset;
-			}
-			else{
-				Counter_State = Counter_subWait;
-			}
-				break;
-		case Counter_reset:
-			if((PINA & 0x01) && (PINA & 0x02)){
-				Counter_State = Counter_reset;	
-			}
-			else{
-				Counter_State = Counter_wait;	
-			}
+		case Lock_wait:
+			Lock_State =  Lock_wait;
 			break;
 		default:
-			Counter_State = Counter_SMStart;
+			Lock_State = Lock_SMStart;
 			break;
 	}
 	switch(Counter_State) {   // State actions
