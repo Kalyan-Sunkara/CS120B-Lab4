@@ -11,7 +11,9 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum Lock_States {Lock_SMStart, Lock_wait, Lock_hash, Lock_hashWait, Lock_Y, LOCK, UNLOCK} Lock_State;
+enum Lock_States {Lock_SMStart, Lock_wait, Lock_code, LOCK, UNLOCK} Lock_State;
+unsigned char lockArray[4] = {0x04, 0x01, 0x02, 0x01};
+unsigned char count = 1;
 void SMTick(){
 	switch(Lock_State){
 		case Lock_SMStart:
@@ -28,30 +30,19 @@ void SMTick(){
 				Lock_State = Lock_wait;	
 			}
 			break;
-		case Lock_hash:
-			if(PINA == 0x00){
-				Lock_State = Lock_hashWait;
+		case Lock_code:
+			if(count == 4){
+				count = 1;
+				Lock_State = UNLOCK;
 			}
-			else if(PINA & 0x04){
-			Lock_State =  Lock_hash;
-			}
-			else{
-				Lock_State = Lock_wait;	
-			}
-			break;
-		case Lock_hashWait:
-			if(PINA == 0x02){
-                		Lock_State= Lock_Y;
-            		}
-			else if(PINA == 0x00){
-				Lock_State = Lock_hashWait;
+			else if(PINA == lockArray[count]){
+				count++;
+				Lock_State = Lock_code;
 			}
 			else{
 				Lock_State = Lock_wait;
+				count = 1;	
 			}
-			break;
-		case Lock_Y:
-			Lock_State = UNLOCK;
 			break;
 		case UNLOCK:
 			Lock_State = Lock_wait;
@@ -68,11 +59,7 @@ void SMTick(){
 			break;
 		case Lock_wait:
 			break;
-		case Lock_hash:
-			break;
-		case Lock_hashWait:
-			break;
-		case Lock_Y:
+		case Lock_code:
 			break;
 		case UNLOCK:
 			PORTB = !PORTB; //flips if locked or unlocked 
