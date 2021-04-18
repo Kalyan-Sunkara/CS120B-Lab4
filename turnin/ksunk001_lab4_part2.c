@@ -38,6 +38,9 @@ void SMTick(){
 			if(!(PINA & 0x01)){
                                 Counter_State = Counter_wait;
                         }
+			else if((PINA & 0x01) && (PINA & 0x02)){
+				Counter_State = Counter_reset;
+			}
 // 			else if((PINA & 0x01) && !(PINA & 0x02)){
 // 				Counter_State = Counter_addWait
 // 			}
@@ -60,6 +63,9 @@ void SMTick(){
 			if(!(PINA & 0x02)){
                                 Counter_State = Counter_wait;
                         }
+			else if((PINA & 0x01) && (PINA & 0x02)){
+				Counter_State = Counter_reset;
+			}
                         else{
                                 Counter_State = Counter_subWait;
                         }
