@@ -11,26 +11,18 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum Lock_States {Lock_SMStart, Lock_wait, Lock_code, LOCK, UNLOCK, Lock_wait2} Lock_State;
+enum Lock_States {Lock_SMStart, Lock_code, LOCK, UNLOCK, Lock_wait} Lock_State;
 unsigned char lockArray[4] = {0x04, 0x01, 0x02, 0x01};
 unsigned char count = 0;
 void SMTick(){
 	switch(Lock_State){
 		case Lock_SMStart:
-			Lock_State = Lock_wait;
-			break;
-		case Lock_wait:
-			if(PINA & 0x80){
-				Lock_State = LOCK;
-			}
-			else if(PINA & 0x04){
-			Lock_State =  Lock_code;
-			}
-			else{
-				Lock_State = Lock_wait;	
-			}
+			Lock_State = Lock_code;
 			break;
 		case Lock_code:
+			if(PINA & 0x80){
+                                Lock_State = LOCK;
+                        }
 			if(count == 4){
 				count = 0;
 				Lock_State = UNLOCK;
@@ -40,25 +32,25 @@ void SMTick(){
 			}
 			else if(PINA == lockArray[count]){
 				count++;
-				Lock_State = Lock_wait2;
+				Lock_State = Lock_wait;
 			}
 			else{
-				Lock_State = Lock_wait;
+				Lock_State = Lock_code;
 				count = 0;	
 			}
 			break;
-		case Lock_wait2:
+		case Lock_wait:
 			if(PINA == 0){
 				Lock_State = Lock_code;
 			}
 			else{
-				Lock_State = Lock_wait2;
+				Lock_State = Lock_wait;
 			}
 		case UNLOCK:
-			Lock_State = Lock_wait;
+			Lock_State = Lock_code;
 			break;
 		case LOCK:
-			Lock_State = Lock_wait;
+			Lock_State = Lock_code;
 			break;
 		default:
 			Lock_State = Lock_SMStart;
