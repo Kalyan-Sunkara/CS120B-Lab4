@@ -68,7 +68,7 @@ void SMTick(){
 			if(!(PINA & 0x02)){
                                 Counter_State = Counter_wait;
                         }
-			else if((PINA & 0x01) & (PINA & 0x02)){
+			else if((PINA & 0x01) && (PINA & 0x02)){
 				Counter_State = Counter_reset;
 			}
 			else{
@@ -76,7 +76,7 @@ void SMTick(){
 			}
 				break;
 		case Counter_reset:
-			if((PINA & 0x01) & (PINA & 0x02)){
+			if((PINA & 0x01) && (PINA & 0x02)){
 				Counter_State = Counter_reset;	
 			}
 			else{
