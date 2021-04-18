@@ -23,7 +23,7 @@ void SMTick(){
 			if(PINA & 0x80){
                                 Lock_State = LOCK;
                         }
-			if(count == 4){
+			else if(count == 4){
 				count = 0;
 				Lock_State = UNLOCK;
 			}
@@ -46,6 +46,7 @@ void SMTick(){
 			else{
 				Lock_State = Lock_wait;
 			}
+			break;
 		case UNLOCK:
 			Lock_State = Lock_code;
 			break;
