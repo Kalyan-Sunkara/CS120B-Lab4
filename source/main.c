@@ -11,42 +11,74 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum Lock_States {Lock_SMStart, Lock_wait, Lock_hash, Lock_hashWait, Lock_Y, Lock_YWait, LOCK, UNLOCK} Lock_State;
+enum Lock_States {Lock_SMStart, Lock_wait, Lock_hash, Lock_hashWait, Lock_Y, LOCK, UNLOCK} Lock_State;
 void SMTick(){
 	switch(Lock_State){
 		case Lock_SMStart:
 			Lock_State = Lock_wait;
 			break;
 		case Lock_wait:
-			Lock_State =  Lock_wait;
+			if(PINA & 0x80){
+				Lock_State = LOCK;
+			}
+			else if(PINA & 0x04){
+			Lock_State =  Lock_hash;
+			}
+			else{
+				Lock_State = Lock_wait;	
+			}
+			break;
+		case Lock_hash:
+			if(!PINA){
+				Lock_State = Lock_hashWait;
+			}
+			else if(PINA & 0x04){
+			Lock_State =  Lock_hash;
+			}
+			else{
+				Lock_State = Lock_wait;	
+			}
+			break;
+		case Lock_hashWait:
+			if(PINA == 0x02){
+                		Lock_State= Lock_Y;
+            		}
+            		else if(PINA){
+				Lock_State = Lock_hashWait;
+	    		}
+			else{
+				Lock_State = Lock_wait;
+			}
+			break;
+		case Lock_Y:
+			Lock_state = UNLOCK;
+			break;
+		case UNLOCK:
+			Lock_state = Lock_wait;
+			break;
+		case LOCK:
+			Lock_state = Lock_wait;
 			break;
 		default:
 			Lock_State = Lock_SMStart;
 			break;
 	}
-	switch(Counter_State) {   // State actions
- 		case Counter_SMStart:
+	switch(Lock_State) {   // State actions
+ 		case Lock_SMStart:
 			break;
-		case Counter_start:
-			PORTC = 0x07;
-		case Counter_wait:
+		case Lock_wait:
 			break;
-	 	case Counter_add:
-			if(PORTC < 9){
-				PORTC = PORTC + 1;	
-			}
-                        break;
-		case  Counter_addWait:
+		case Lock_hash:
 			break;
-		case Counter_sub:
-			if(PORTC > 0){
-				PORTC = PORTC - 1;	
-			}
+		case Lock_hashWait:
 			break;
-		case  Counter_subWait:
+		case Lock_Y:
 			break;
-		case Counter_reset:
-			PORTC = 0x00;
+		case UNLOCK:
+			PORTB = 0x01;
+			break;
+		case LOCK:
+			PORTB = 0x00;
 			break;
 		default:
 			break;
@@ -58,6 +90,9 @@ int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00;
 	PORTA = 0xFF;
+	
+	DDRB = 0xFF;
+	PORTB = 0x00;
 
 	DDRC = 0xFF;
 	PORTC = 0x00;
