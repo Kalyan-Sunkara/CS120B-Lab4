@@ -21,13 +21,13 @@ void SMTick(){
 			Counter_State =  Counter_wait;
 			break;
 		case Counter_wait:
-			if((PINA & 0x01) && !(PINA & 0x02)){
+			if((~PINA & 0x01) && !(~PINA & 0x02)){
 				Counter_State = Counter_add;
 			}
-			else if(!(PINA & 0x01) && (PINA & 0x02)){
+			else if(!(~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State = Counter_sub;
 			}
-			else if((PINA & 0x01) && (PINA & 0x02)){
+			else if((~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State  = Counter_reset;
 			}
 			else{
@@ -35,10 +35,10 @@ void SMTick(){
 			}
 			break;
 	 	case Counter_add:
-			if(!(PINA & 0x01)){
+			if(!(~PINA & 0x01)){
                                 Counter_State = Counter_wait;
                         }
-			else if((PINA & 0x01) && (PINA & 0x02)){
+			else if((~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State = Counter_reset;
 			}
 // 			else if((PINA & 0x01) && !(PINA & 0x02)){
@@ -49,10 +49,10 @@ void SMTick(){
                         }
                         break;
 		case  Counter_addWait:
-			if(!(PINA & 0x01)){
+			if(!(~PINA & 0x01)){
                                 Counter_State = Counter_wait;
                         }
-			else if((PINA & 0x01) && (PINA & 0x02)){
+			else if((~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State = Counter_reset;
 			}
 			else{
@@ -60,10 +60,10 @@ void SMTick(){
 			}
 			break;
 		case Counter_sub:
-			if(!(PINA & 0x02)){
+			if(!(~PINA & 0x02)){
                                 Counter_State = Counter_wait;
                         }
-			else if((PINA & 0x01) && (PINA & 0x02)){
+			else if((~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State = Counter_reset;
 			}
                         else{
@@ -71,10 +71,10 @@ void SMTick(){
                         }
                         break;
 		case  Counter_subWait:
-			if(!(PINA & 0x02)){
+			if(!(~PINA & 0x02)){
                                 Counter_State = Counter_wait;
                         }
-			else if((PINA & 0x01) && (PINA & 0x02)){
+			else if((~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State = Counter_reset;
 			}
 			else{
@@ -82,7 +82,7 @@ void SMTick(){
 			}
 				break;
 		case Counter_reset:
-			if((PINA & 0x01) && (PINA & 0x02)){
+			if((~PINA & 0x01) && (~PINA & 0x02)){
 				Counter_State = Counter_reset;	
 			}
 			else{
